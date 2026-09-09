@@ -1,42 +1,6 @@
 local default = "tokyonight-night"
 local state_file = vim.fn.stdpath("state") .. "/colorscheme"
 
--- groups whose background is cleared so the terminal shows through
-local transparent_groups = {
-	"Normal",
-	"NormalNC",
-	"NormalFloat",
-	"FloatBorder",
-	"FloatTitle",
-	"SignColumn",
-	"LineNr",
-	"CursorLineNr",
-	"EndOfBuffer",
-	"NonText",
-	"FoldColumn",
-	"Folded",
-	"VertSplit",
-	"WinSeparator",
-	"MsgArea",
-	"MsgSeparator",
-	"StatusLine",
-	"StatusLineNC",
-	"TabLine",
-	"TabLineFill",
-	"TabLineSel",
-	"WinBar",
-	"WinBarNC",
-	"TelescopeNormal",
-	"TelescopeBorder",
-	"TelescopeTitle",
-	"TelescopePromptNormal",
-	"TelescopePromptBorder",
-	"TelescopeResultsNormal",
-	"TelescopeResultsBorder",
-	"TelescopePreviewNormal",
-	"TelescopePreviewBorder",
-}
-
 local function saved()
 	local f = io.open(state_file, "r")
 	if not f then
@@ -56,32 +20,14 @@ local function strip_italics()
 	end
 end
 
-local function strip_backgrounds()
-	if not vim.g.user_transparent then
-		return
-	end
-	for _, group in ipairs(transparent_groups) do
-		local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group, link = false })
-		if ok then
-			hl.bg = "NONE"
-			hl.ctermbg = "NONE"
-			pcall(vim.api.nvim_set_hl, 0, group, hl)
-		end
-	end
-end
-
 local function setup_colorscheme()
 	vim.o.background = "dark"
-	if vim.g.user_transparent == nil then
-		vim.g.user_transparent = true
-	end
 
 	local group = vim.api.nvim_create_augroup("user_colorscheme", { clear = true })
 	vim.api.nvim_create_autocmd("ColorScheme", {
 		group = group,
 		callback = function(ev)
 			strip_italics()
-			strip_backgrounds()
 			local f = io.open(state_file, "w")
 			if f then
 				f:write(ev.match, "\n")
@@ -89,11 +35,6 @@ local function setup_colorscheme()
 			end
 		end,
 	})
-
-	vim.keymap.set("n", "<leader>ub", function()
-		vim.g.user_transparent = not vim.g.user_transparent
-		pcall(vim.cmd.colorscheme, vim.g.colors_name or default)
-	end, { desc = "Toggle transparent background" })
 
 	local name = saved() or default
 	if not pcall(vim.cmd.colorscheme, name) then
@@ -113,6 +54,7 @@ return {
 			"oskarnurm/koda.nvim",
 			"sainnhe/gruvbox-material",
 			"Shatur/neovim-ayu",
+			"shaunsingh/doom-vibrant.nvim",
 			"eldritch-theme/eldritch.nvim",
 			"neanias/everforest-nvim",
 			"ellisonleao/gruvbox.nvim",
@@ -133,6 +75,7 @@ return {
 		name = "catppuccin",
 		lazy = false,
 		priority = 1000,
+		opts = { no_italic = true },
 	},
 	{
 		"navarasu/onedark.nvim",
@@ -177,6 +120,19 @@ return {
 		end,
 	},
 
+	-- doom-vibrant  ->  :colorscheme doom
+	{
+		"shaunsingh/doom-vibrant.nvim",
+		lazy = false,
+		priority = 1000,
+		init = function()
+			vim.g.doom_italic = false
+			vim.g.doom_contrast = false
+			vim.g.doom_borders = false
+			vim.g.doom_disable_background = false
+		end,
+	},
+
 	-- eldritch  ->  :colorscheme eldritch
 	{
 		"eldritch-theme/eldritch.nvim",
@@ -206,7 +162,7 @@ return {
 		end,
 	},
 
-	-- gruvbox (ellisonleo), medium contrast  ->  :colorscheme gruvbox
+	-- gruvbox (ellisonleao), medium contrast  ->  :colorscheme gruvbox
 	{
 		"ellisonleao/gruvbox.nvim",
 		lazy = false,

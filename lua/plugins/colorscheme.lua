@@ -1,4 +1,4 @@
-local default = "tokyonight-night"
+local default = "gruvbox-material"
 local state_file = vim.fn.stdpath("state") .. "/colorscheme"
 
 local function saved()
